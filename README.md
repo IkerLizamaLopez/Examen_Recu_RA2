@@ -8,67 +8,122 @@ Toda la coleccion de ejercicios ha sido depurada para eliminar emojis, acentos (
 
 ## Estructura del Repositorio
 
-El repositorio se divide en dos bloques principales para facilitar el aprendizaje:
+El repositorio se divide en **5 bloques** principales para facilitar el aprendizaje progresivo:
 
 1. **`01_Ejemplos_y_Clases_Originales/`**
    * Contiene todos los scripts, explicaciones y proyectos practicos que se desarrollaron originalmente en clase (como el puente estrecho original, el comedor de galletas, simulaciones del banco, ping-pong, etc.).
    * Preserva el 100% de tu codigo previo de forma intacta.
 
-2. **`02_Coleccion_20_Ejercicios_Concurrencia/`**
+2. **`02_Coleccion_20_Ejercicios_Concurrencia/`** (ORIGINAL)
    * Una coleccion organizada de **25 ejercicios resueltos** paso a paso, abarcando desde los fundamentos mas sencillos de exclusión mutua hasta patrones de concurrencia avanzados y examenes oficiales.
-   * Cada ejercicio esta en su propia carpeta e incluye:
-     * **`README.md`**: El enunciado detallado y explicaciones teoricas en castellano puro sin tildes ni emojis.
-     * **`main.py`**: El codigo de la solucion completo, altamente modular, autodocumentado y listo para ser ejecutado directamente.
+   * Cada ejercicio esta en su propia carpeta e incluye README.md y main.py.
+
+3. **`03_Nivel_Suave_Basico/`** (NUEVO - 10 EJERCICIOS BASICOS)
+   * Introducción suave a los conceptos de concurrencia
+   * Enfocado en estudiantes sin experiencia previa
+   * Contiene: race conditions, locks simples, events, turnos, colas, semaphores, etc.
+
+4. **`04_Nivel_Intermedio_Medio/`** (NUEVO - 15 EJERCICIOS INTERMEDIOS)
+   * Combinaciones de primitivas de sincronizacion
+   * Patrones mas complejos: productor-consumidor multiples, lector-escritor, timeouts, reintentos
+   * Pool de hilos, jerarquia de recursos, coordinacion avanzada
+
+5. **`05_Nivel_Avanzado_Dificil/`** (NUEVO - 10 EJERCICIOS AVANZADOS)
+   * Problemas clasicos de concurrencia: filosofos, barbero, puente estrecho
+   * Casos de examen: conejos, transacciones, parking VIP, fabrica
+   * Prevencion de deadlock, starvation, recovery
+   * Coordinacion multi-recurso compleja
 
 ---
 
-## Catalogo de los 25 Ejercicios Creados (Indice General)
+## Catalogo Completo: 35+ Ejercicios Organizados por Dificultad
 
-### Bloque 1: Locks y Exclusion Mutua (Basico)
-* **`ejercicio_01_contador_seguro`**: Simula el acceso seguro a una seccion critica con `threading.Lock` para contar visitas web concurrentes de forma exacta.
-* **`ejercicio_02_reserva_entradas`**: Simula reservas de entradas de cine concurrentes con control de stock sin permitir duplicaciones ni inventario negativo.
-* **`ejercicio_03_filosofos_comensales`**: El problema clasico de los 5 filosofos comensales. Resuelto mediante la tecnica de jerarquia de recursos para evitar interbloqueos (deadlocks).
-* **`ejercicio_04_banco_transferencias`**: Transferencias concurrentes cruzadas entre cuentas bancarias. Resuelve deadlocks ordenando los IDs de cuentas antes de adquirir los locks.
+### NIVEL 1: BASICO - 10 Ejercicios (Fundamentos)
+Perfect para empezar desde cero. Cubre un concepto por ejercicio.
 
-### Bloque 2: Semaforos y Control de Aforo
-* **`ejercicio_05_cafeteria_aforo`**: Simulación de aforo limitado en un local mediante `threading.Semaphore`.
-* **`ejercicio_06_peaje_autopista`**: Control del uso de cabinas de pago activas en paralelo mediante `threading.BoundedSemaphore` para una mayor seguridad.
-* **`ejercicio_07_impresoras_compartidas`**: Una oficina con 3 impresoras distintas compartidas. Combina un `Semaphore(3)` para el aforo general y un `Lock` para saber y reservar la impresora exacta elegida.
+1. **Contador - Race Condition**: Demuestra condicion de carrera sin sincronizacion
+2. **Contador Seguro - Lock**: Resuelve race condition con Lock
+3. **Bandera - Event Basico**: Comunicacion simple entre hilos con Event
+4. **Turnos - Condition Variable**: Alterna entre dos hilos
+5. **Cola Simple - Queue**: Productor-consumidor basico
+6. **Aforo - Semaphore**: Limita acceso simultaneo (capacidad)
+7. **Impresoras Simples**: Combina Semaphore + Lock
+8. **Carrera - Barrier**: Sincroniza multiples hilos en punto
+9. **Ping-Pong Basico**: Alternancia perfecta con Events
+10. **Banco Simple**: Retiros seguros con Lock
 
-### Bloque 3: Variables de Condicion y Productor-Consumidor
-* **`ejercicio_08_productor_consumidor_cola`**: Patrón Productor-Consumidor clasico mediante `queue.Queue` limitada. Utiliza senales de parada centinela (`None`) para un apagado limpio de hilos.
-* **`ejercicio_09_ensamblador_fabrica`**: Montaje de patinetes que requieren piezas de 3 productores independientes. Utiliza `threading.Condition` para esperar eficientemente la disponibilidad de todas las piezas requeridas (2 ruedas, 1 manillar, 1 motor).
-* **`ejercicio_10_buffer_limitado_manual`**: Recrea un bufer circular de tamaño fijo manualmente mediante una `list` estandar y una variable `threading.Condition`, sin utilizar la libreria `queue`.
-* **`ejercicio_11_barbero_durmiente`**: Implementa la coordinacion del barbero durmiente con 3 sillas de espera mediante `threading.Condition`.
-* **`ejercicio_12_puente_estrecho_prioridad`**: Simulación avanzada de puente de carril unico con prioridades y limites consecutivos para evitar hambruna (starvation) de un carril.
+### NIVEL 2: INTERMEDIO - 15 Ejercicios (Patrones Complejos)
+Combina multiples primitivas. Requiere entender conceptos basicos.
 
-### Bloque 4: Coordinacion con Eventos y Barreras
-* **`ejercicio_13_ping_pong_eventos`**: Alternancia perfecta de dos hilos ("Ping" y "Pong") mediante dos objetos `threading.Event`.
-* **`ejercicio_14_ping_pong_condicion`**: Alternancia perfecta de hilos de juego usando una unica variable `threading.Condition` y una variable de turno compartido.
-* **`ejercicio_15_cruce_peatones`**: Regulacion de coches que circulan hasta que un peaton pulsa el boton, coordinados por un `threading.Event` que actua como semaforo interactivo.
-* **`ejercicio_16_lobby_multijugador`**: Inicio simultaneo de una partida online unicamente cuando se registran 4 jugadores usando `threading.Barrier`.
+1. **Productor-Consumidor Avanzado**: Multiples productores y consumidores
+2. **Buffer Limitado Manual**: Implementa manualmente sin Queue
+3. **Lector-Escritor**: Problema clasico de concurrencia
+4. **Productores Multiples Coordinados**: 3 tipos esperan a ensamblador
+5. **Cola con Prioridad**: PriorityQueue para triaje
+6. **Timeout - Espera con Limite**: queue.get(timeout=X)
+7. **Reintentos Limitados**: Manejo de fallos con reintentos
+8. **Pool de Hilos**: ThreadPoolExecutor para paralelismo
+9. **Recursos Multiples Ordenados**: Jerarquia para evitar deadlock
+10. **Contador con Limites**: Invariantes con Condition
+11. **Carrera de Recursos**: Semaphore con competencia
+12. **Productor-Consumidor Multiples Avanzado**: Colas multiples
+13. **Semaforos Multiples**: Varios recursos independientes
+14. **Eventos de Coordinacion**: Fases de ejecucion
+15. **Condition Variables Multiples**: Orden de ejecucion
 
-### Bloque 5: Casos Avanzados de Examen e Hilos Coordinados
-* **`ejercicio_17_parking_mixto_vip`**: Aparcamiento con plazas Estandar y VIP, donde los vehiculos VIP tienen prioridad de plaza VIP y capacidad de usar Estandar, sincronizados mediante `Condition`.
-* **`ejercicio_18_comedero_mascotas_intentos`**: Mascotas que comen de un comedero compartido de capacidad 2. Si esta lleno, esperan llamando a `wait(timeout=1.0)` y se retiran tras agotar 3 intentos fallidos.
-* **`ejercicio_19_urgencias_hospital_prioridad`**: Simulación de triaje en urgencias medicas donde los pacientes se atienden prioritariamente segun su gravedad mediante `queue.PriorityQueue`.
-* **`ejercicio_20_procesamiento_lotes_pool`**: Consulta asincrona paralela a 10 servidores mediante un pool de hilos `concurrent.futures.ThreadPoolExecutor`, gestionando respuestas exitosas y excepciones mediante `Future`.
+### NIVEL 3: AVANZADO - 10 Ejercicios (Problemas Clasicos + Examen)
+Problemas reales y de examen. Para dominar concurrencia.
 
-### Bloque 6: Casos de Examen Jovellanos y Ampliacion (Nuevos)
-* **`ejercicio_21_comedero_conejos`**: El examen oficial de Jovellanos (Conejos y Comedero). Conejos que son hilos con 5 intentos totales, muerte tras 3 fallos seguidos, Lock de exclusion mutua y Semaphore para representar porciones disponibles.
-* **`ejercicio_22_lavanderia_sem`**: Simulación de aforo en una lavanderia con 4 maquinas y 8 clientes concurrentes mediante `threading.Semaphore`.
-* **`ejercicio_23_almacen_piezas_cond`**: Almacen donde operarios depositan piezas A y B de forma concurrente, y un ensamblador espera con `Condition` a tener al menos 1 de cada una para crear un paquete.
-* **`ejercicio_24_cajero_seguro_lock`**: Cajero automatico seguro con multiples clientes de ingresos y retiradas usando `Lock` para proteger el saldo compartido contra valores negativos y condiciones de carrera.
-* **`ejercicio_25_puente_estrecho_simple`**: Simulación simplificada y basica del paso alterno Norte-Sur sobre un puente estrecho de un unico carril usando un `Lock` principal y una `Condition` para el cambio de sentido.
+1. **Filosofos Comensales**: Problema clasico de deadlock
+2. **Barbero Durmiente**: Coordinacion consumidor con 3 sillas
+3. **Puente Estrecho**: Cambio de sentido alternado N-S
+4. **Parking VIP**: Recursos con prioridades
+5. **Productor-Consumidor Complejo**: N productores, M colas, dinamica
+6. **Fabrica Ensamblador**: 3 productores, 1 ensamblador
+7. **Carrera con Prioridad**: Starvation prevention
+8. **Deadlock Recovery**: Timeouts para recuperacion
+9. **Conejos y Comedero**: EXAMEN OFICIAL JOVELLANOS
+10. **Transacciones Bancarias**: Multiples cuentas concurrentes
+
+---
+
+## Recomendacion: Ruta de Estudio
+
+### Para principiantes:
+1. Comenzar con **Nivel 1 (Basico)**: 10 ejercicios simples
+2. Luego **Nivel 2 (Intermedio)**: 15 ejercicios con patrones
+3. Finalmente **Nivel 3 (Avanzado)**: 10 ejercicios clasicos
+
+### Para preparar el examen oficial (Comedero Conejos):
+1. Hacer todos los del **Nivel 1** para entender basicos
+2. Enfocarse en **Nivel 2**: ejercicios 1, 2, 4, 6, 7 (productor-consumidor, timeouts, reintentos)
+3. Dominar **Nivel 3**: ejercicio 9 (Conejos y Comedero - EL EXAMEN)
+
+### Tiempo estimado:
+- Nivel 1: 3-4 horas
+- Nivel 2: 6-8 horas
+- Nivel 3: 4-6 horas
+- **Total: 13-18 horas de practica**
 
 ---
 
 ## Como ejecutar los ejercicios
 
 1. **Requisito**: Tener instalado Python 3 en tu sistema.
-2. **Ejecutar**: Navega a la carpeta de cualquier ejercicio y ejecuta su archivo `main.py`.
-   Por ejemplo, para el Ejercicio 21 (el examen de conejos):
+
+2. **Ejecutar nivel basico**:
    ```bash
-   python 02_Coleccion_20_Ejercicios_Concurrencia/ejercicio_21_comedero_conejos/main.py
+   python 03_Nivel_Suave_Basico/ejercicio_01_contador_race/main.py
    ```
-3. **Observar**: Mira con atencion la salida en consola. Cada ejercicio incluye impresiones descriptivas muy detalladas en texto ASCII plano que muestran el comportamiento exacto de los hilos.
+
+3. **Ejecutar nivel intermedio**:
+   ```bash
+   python 04_Nivel_Intermedio_Medio/ejercicio_01_productor_consumidor/main.py
+   ```
+
+4. **Ejecutar nivel avanzado** (examen):
+   ```bash
+   python 05_Nivel_Avanzado_Dificil/ejercicio_09_conejos/main.py
+   ```
+
+5. **Observar**: Cada ejercicio imprime mensajes detallados mostrando el comportamiento de los hilos sincronizados.
