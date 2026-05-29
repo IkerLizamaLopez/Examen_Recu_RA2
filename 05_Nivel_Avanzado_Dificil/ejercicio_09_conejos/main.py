@@ -1,116 +1,169 @@
 """
 EJERCICIO 09: Conejos y Comedero (NIVEL AVANZADO)
-EXAMEN OFICIAL JOVELLANOS - Comedero de Conejos
+EXAMEN OFICIAL JOVELLANOS - Implementacion orientada a objetos
+Demuestra mejor practica: uso de clases para organizar logica
 """
 
 import threading
 import time
 import random
 
-# Recurso compartido: comedero
-raciones_disponibles = 10
-total_comidas_global = 0
 
-# Proteccion de zona critica
-lock_comedero = threading.Lock()
-
-# Estadisticas por conejo
-comidas_por_conejo = {}
-
-def conejo(id_conejo):
+class Comedero:
     """
-    Cada conejo intenta comer durante 5 intentos.
-    Si falla 3 veces seguidas, muere.
-    Si logra comer, los fallos seguidos se reinician.
+    Recurso compartido: Comedero con control de acceso sincronizado.
+    Usa Lock para exclusion mutua y Semaphore para gestionar raciones.
     """
-    global raciones_disponibles, total_comidas_global
     
-    comidas_por_conejo[id_conejo] = 0
-    intentos_totales = 5
-    fallos_seguidos = 0
+    def __init__(self, raciones_iniciales=0):
+        self.raciones_disponibles = raciones_iniciales
+        self.total_comidas = 0
+        self.lock = threading.Lock()
+        # Semaphore: representa raciones disponibles (acquire/release)
+        self.semaforo_raciones = threading.Semaphore(raciones_iniciales)
+
+    def intentar_comer(self, nombre_conejo):
+        """
+        Intenta conseguir una racion sin bloquear (non-blocking).
+        Retorna True si logra comer, False si no hay raciones.
+        """
+        # acquire(blocking=False) intenta tomar recurso sin esperar
+        exito = self.semaforo_raciones.acquire(blocking=False)
+        
+        if exito:
+            # Zona critica: actualizar estado del comedero
+            with self.lock:
+                self.raciones_disponibles -= 1
+                self.total_comidas += 1
+                print(f"  [COMEDERO] {nombre_conejo} COME. Raciones restantes: {self.raciones_disponibles}")
+            return True
+        else:
+            print(f"  [COMEDERO] {nombre_conejo} NO HAY COMIDA")
+            return False
+
+    def reponer(self, cantidad):
+        """
+        Anade raciones y notifica al semaphore.
+        """
+        with self.lock:
+            self.raciones_disponibles += cantidad
+            print(f"[REPONEDOR] Anade {cantidad} raciones. Total: {self.raciones_disponibles}")
+            # Libera el semaphore tantas veces como raciones anadidas
+            for _ in range(cantidad):
+                self.semaforo_raciones.release()
+
+
+class Conejo(threading.Thread):
+    """
+    Hilo que simula comportamiento de un conejo.
+    - 5 intentos de comer
+    - Muere si 3 fallos consecutivos
+    - Si logra comer, reinicia contador de fallos
+    """
     
-    while intentos_totales > 0:
-        # Espera aleatoria entre 0.5 y 2 segundos
-        tiempo_espera = random.uniform(0.5, 2.0)
-        time.sleep(tiempo_espera)
+    def __init__(self, nombre, comedero):
+        super().__init__(name=nombre)
+        self.nombre = nombre
+        self.comedero = comedero
+        self.comidas_realizadas = 0
+        self.fallos_consecutivos = 0
+        self.vivo = True
+
+    def run(self):
+        """Ejecucion del hilo conejo."""
+        print(f"[CONEJO] {self.nombre} nace")
         
-        print(f"Conejo {id_conejo} intenta comer (intentos restantes: {intentos_totales}, fallos seguidos: {fallos_seguidos}/3)")
-        
-        # ZONA CRITICA - protegida por lock
-        with lock_comedero:
-            if raciones_disponibles > 0:
-                # Logra comer
-                raciones_disponibles -= 1
-                comidas_por_conejo[id_conejo] += 1
-                total_comidas_global += 1
-                fallos_seguidos = 0  # Reinicia fallos seguidos
-                
-                print(f"  EXITO: Conejo {id_conejo} COME (raciones restantes: {raciones_disponibles})")
+        # 5 intentos de comer (tiempo de simulacion)
+        for intento_num in range(1, 6):
+            if not self.vivo:
+                break
+            
+            # Espera aleatoria 0.5-2 segundos
+            tiempo_espera = random.uniform(0.5, 2.0)
+            time.sleep(tiempo_espera)
+            
+            print(f"[CONEJO] {self.nombre} intento {intento_num}/5 (fallos: {self.fallos_consecutivos}/3)")
+            
+            # Intentar comer
+            comio = self.comedero.intentar_comer(self.nombre)
+            
+            if comio:
+                # Exito: incrementa comidas y reinicia fallos
+                self.comidas_realizadas += 1
+                self.fallos_consecutivos = 0
             else:
-                # Falla al comer
-                fallos_seguidos += 1
-                print(f"  FALLO: Conejo {id_conejo} no hay comida (fallos seguidos: {fallos_seguidos}/3)")
+                # Fallo: incrementa fallos consecutivos
+                self.fallos_consecutivos += 1
                 
-                # Muere tras 3 fallos seguidos
-                if fallos_seguidos >= 3:
-                    print(f"  MUERTE: Conejo {id_conejo} MUERE por hambre tras 3 fallos seguidos")
-                    return
+                # Muere si 3 fallos consecutivos
+                if self.fallos_consecutivos >= 3:
+                    self.vivo = False
+                    print(f"[MUERTE] {self.nombre} muere tras 3 fallos consecutivos")
+                    break
         
-        intentos_totales -= 1
-    
-    print(f"Conejo {id_conejo} se va satisfecho (comio {comidas_por_conejo[id_conejo]} veces)")
+        if self.vivo:
+            print(f"[CONEJO] {self.nombre} se va (comio {self.comidas_realizadas} veces)")
 
-def reponedor():
+
+def reponedor_proceso(comedero):
     """
-    Repone el comedero con 3 raciones cada 2 segundos.
-    Hace 5 reposiciones completas.
+    Hilo reponedor: anade 3 raciones cada 2 segundos (5 veces).
     """
-    global raciones_disponibles
+    print("[REPONEDOR] Iniciado\n")
     
-    for reposicion in range(1, 6):
-        time.sleep(2)
-        
-        with lock_comedero:
-            raciones_disponibles += 3
-            print(f"[REPONEDOR] Reposicion {reposicion}: anade 3 raciones (total: {raciones_disponibles})\n")
+    for ciclo in range(1, 6):
+        time.sleep(2.0)
+        print(f"[REPONEDOR] Ciclo {ciclo}/5")
+        comedero.reponer(3)
+        print()
+
 
 if __name__ == "__main__":
-    print("=" * 60)
-    print("EXAMEN JOVELLANOS - CONEJOS Y COMEDERO")
-    print("=" * 60)
-    print(f"\nConfiguracion inicial:")
-    print(f"- 4 conejos (hilos)")
-    print(f"- Raciones iniciales: {raciones_disponibles}")
-    print(f"- Cada conejo: 5 intentos maximo")
-    print(f"- Muere si: 3 fallos seguidos")
-    print(f"- Reponedor: 3 raciones cada 2 segundos (5 veces)")
-    print("\n" + "=" * 60 + "\n")
+    print("=" * 70)
+    print("EXAMEN OFICIAL JOVELLANOS - CONEJOS Y COMEDERO")
+    print("Implementacion orientada a objetos (NIVEL AVANZADO)")
+    print("=" * 70)
+    print("\nConfiguracion:")
+    print("  - 4 conejos (hilos independientes)")
+    print("  - Cada conejo: 5 intentos de comer")
+    print("  - Muerte: tras 3 fallos consecutivos")
+    print("  - Reponedor: 3 raciones cada 2 segundos (5 ciclos)")
+    print("  - Raciones iniciales: 0 (esperan reponedor)")
+    print("=" * 70 + "\n")
     
-    # Crear hilos de conejos
-    hilos_conejos = [threading.Thread(target=conejo, args=(i,), name=f"Conejo-{i}") 
-                     for i in range(1, 5)]
+    # Crear comedero (comienza con 0 raciones)
+    comedero = Comedero(0)
     
-    # Crear hilo reponedor
-    hilo_reponedor = threading.Thread(target=reponedor, name="Reponedor", daemon=True)
+    # Crear 4 conejos
+    conejos = [
+        Conejo("Conejo-Blanco", comedero),
+        Conejo("Conejo-Gris", comedero),
+        Conejo("Conejo-Cafe", comedero),
+        Conejo("Conejo-Negro", comedero),
+    ]
     
-    # Iniciar todos los hilos
+    # Iniciar hilo reponedor
+    hilo_reponedor = threading.Thread(target=reponedor_proceso, args=(comedero,), 
+                                       name="Reponedor", daemon=True)
     hilo_reponedor.start()
     
-    for h in hilos_conejos:
-        h.start()
+    # Iniciar conejos
+    for conejo in conejos:
+        conejo.start()
     
-    # Esperar a que terminen todos
-    for h in hilos_conejos:
-        h.join()
+    # Esperar a que terminen todos los conejos
+    for conejo in conejos:
+        conejo.join()
     
-    # Resultados finales
-    print("\n" + "=" * 60)
+    # Estadisticas finales
+    print("\n" + "=" * 70)
     print("ESTADISTICAS FINALES")
-    print("=" * 60)
+    print("=" * 70)
     
-    for id_conejo in sorted(comidas_por_conejo.keys()):
-        print(f"Conejo {id_conejo}: comio {comidas_por_conejo[id_conejo]} veces")
+    print("\nComidas por conejo:")
+    for conejo in conejos:
+        print(f"  {conejo.nombre}: {conejo.comidas_realizadas} comidas")
     
-    print(f"\nTotal de comidas dadas: {total_comidas_global}")
-    print(f"Raciones sin repartir: {raciones_disponibles}")
-    print("=" * 60)
+    print(f"\nTotal de comidas dadas: {comedero.total_comidas}")
+    print(f"Raciones sin repartir: {comedero.raciones_disponibles}")
+    print("=" * 70)

@@ -85,45 +85,4 @@ Problemas reales y de examen. Para dominar concurrencia.
 9. **Conejos y Comedero**: EXAMEN OFICIAL JOVELLANOS
 10. **Transacciones Bancarias**: Multiples cuentas concurrentes
 
----
 
-## Recomendacion: Ruta de Estudio
-
-### Para principiantes:
-1. Comenzar con **Nivel 1 (Basico)**: 10 ejercicios simples
-2. Luego **Nivel 2 (Intermedio)**: 15 ejercicios con patrones
-3. Finalmente **Nivel 3 (Avanzado)**: 10 ejercicios clasicos
-
-### Para preparar el examen oficial (Comedero Conejos):
-1. Hacer todos los del **Nivel 1** para entender basicos
-2. Enfocarse en **Nivel 2**: ejercicios 1, 2, 4, 6, 7 (productor-consumidor, timeouts, reintentos)
-3. Dominar **Nivel 3**: ejercicio 9 (Conejos y Comedero - EL EXAMEN)
-
-### Tiempo estimado:
-- Nivel 1: 3-4 horas
-- Nivel 2: 6-8 horas
-- Nivel 3: 4-6 horas
-- **Total: 13-18 horas de practica**
-
----
-
-## Como ejecutar los ejercicios
-
-1. **Requisito**: Tener instalado Python 3 en tu sistema.
-
-2. **Ejecutar nivel basico**:
-   ```bash
-   python 03_Nivel_Suave_Basico/ejercicio_01_contador_race/main.py
-   ```
-
-3. **Ejecutar nivel intermedio**:
-   ```bash
-   python 04_Nivel_Intermedio_Medio/ejercicio_01_productor_consumidor/main.py
-   ```
-
-4. **Ejecutar nivel avanzado** (examen):
-   ```bash
-   python 05_Nivel_Avanzado_Dificil/ejercicio_09_conejos/main.py
-   ```
-
-5. **Observar**: Cada ejercicio imprime mensajes detallados mostrando el comportamiento de los hilos sincronizados.
